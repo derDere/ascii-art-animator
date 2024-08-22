@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII Art Animator</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f0f0;
+    }
+
+    textarea {
+      font-family: monospace;
+      border: 1px solid #555;
+      padding: 0;
+      margin: 0;
+      resize: none;
+      outline: none;
+    }
+
+    #preview {
+      position: relative;
+      display: inline-block;
+    }
+
+    #pframe,
+    #nframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      background-color: #fff;
+      color: #f00;
+      overflow: hidden;
+    }
+
+    #nframe {
+      z-index: 2;
+      color: #00f;
+      opacity: 0.5;
+    }
+
+    #cframe {
+      position: relative;
+      top: 0;
+      left: 0;
+      z-index: 3;
+      overflow: hidden;
+      background-color: rgba(255, 255, 255, 0.6);
+      color: #000;
+    }
+
+    #cframe.playing {
+      background-color: rgba(255, 255, 255, 1);
+    }
+
+    #form,
+    #content {
+      width: 300px;
+      height: 500px;
+      margin: 0 20px;
+      border: 1px solid #aaa;
+      background: #fff;
+    }
+
+    #form input {
+      display: inline-block;
+      width: 150px;
+    }
+    #form input:hover {
+      background: #ffc;
+      accent-color: #f70;
+    }
+
+    #form label {
+      display: inline-block;
+      width: 70px;
+      text-align: right;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      margin: 10px 0;
+      padding: 0;
+      text-align: center;
+      display: block;
+      color: #017;
+    }
+
+    h1 { font-size: 30px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 18px; }
+    h4 { font-size: 16px; }
+    h5 { font-size: 14px; }
+    h6 { font-size: 12px; }
+
+    #timeline {
+      text-align: center;
+      padding: 10px;
+    }
+
+    #timeline .frame {
+      display: inline-block;
+      width: 12px;
+      height: 22px;
+      background-color: #ccc;
+      border: 1px solid #aaa;
+      margin: 0 1px;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+
+    #timeline .frame.current {
+      border: 2px solid #07f;
+      background: #4Af;
+    }
+
+    #timeline .frame.empty {
+      background-color: #fff;
+    }
+
+    #timeline .frame:hover {
+      background-color: #3A3;
+    }
+
+    #timeline .frame:hover.frame.empty {
+      background-color: #7F7;
+    }
+  </style>
+</head>
+<body>
+  <table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%">
+    <tr>
+      <td align="center" valign="middle">
+
+        <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td colspan="3" align="center">
+              <h1>ASCII Art Animator</h1>
+            </td>
+          </tr>
+          <tr>
+            <td rowspan="3">
+              <div id="form">
+                <h2>Settings</h2>
+                <label for="fps">FPS:</label>
+                <input type="number" id="fps" value="5" min="1" max="240" step="1" />
+                <br />
+                <label for="width">Width:</label>
+                <input type="number" id="width" value="30" min="1" max="200" step="1" />
+                <br />
+                <label for="height">Height:</label>
+                <input type="number" id="height" value="15" min="1" max="200" step="1" />
+                <br />
+                <label for="repeat">Repeat:</label>
+                <input type="checkbox" id="repeat" checked />
+                <br />
+              </div>
+            </td>
+            <td align="center">
+              <div id="preview">
+                <textarea id="pframe" cols="30" rows="15" readonly>123___</textarea>
+                <textarea id="nframe" cols="30" rows="15" readonly>___456</textarea>
+                <textarea id="cframe" cols="30" rows="15">______789</textarea>
+              </div>
+            </td>
+            <td rowspan="3">
+              <textarea id="content"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <td align="center">
+              <button id="prev" title="Previous Frame" >&larr;</button>
+              <button id="stop" title="Stop" >&#160;█▌</button>
+              <button id="play" title="Play/Pause" >►▌▌</button>
+              <button id="next" title="Next Frame" >&rarr;</button>
+            </td>
+          </tr>
+          <tr>
+            <td align="center">
+              <button id="addLeftframe">Add Frame Left to Current</button>
+              <button id="delframe">Delete current Frame</button>
+              <button id="addRightframe">Add Frame Right to Current</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3">
+              <div id="timeline"><!--<span class="frame"></span><span class="frame current"></span><span class="frame empty current"></span><span class="frame empty"></span>--></div>
+            </td>
+          </tr>
+        </table>
+
+        <script type="text/javascript">
+          function createNewAnimation() {
+            let obj = {
+              fps: 15,
+              width: 7,
+              height: 3,
+              repeat: true,
+              frames: [
+                "   _   \n..o0o..\n   '   ",
+                "    _  \n...o0o.\n    '  ",
+                "     _ \n....o0o\n     ' ",
+                "      _\no....o0\n      '",
+                "_      \n0o....o\n'      ",
+                " _     \no0o....\n '     ",
+                "  _    \n.o0o...\n  '    ",
+              ]
+            };
+            return obj;
+          }
+
+          function updateContent() {
+            let contentTxb = document.getElementById("content");
+            let json = JSON.stringify(document.animation, null, 2);
+            contentTxb.value = json;
+          }
+
+          function updateAnimationFromContent() {
+            let contentTxb = document.getElementById("content");
+            let json = contentTxb.value;
+            try {
+              let obj = JSON.parse(json);
+              document.animation = obj;
+              readIntoInputs();
+              updateFrame();
+              updateTimeline();
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
+          function updateFrame() {
+            let pFrameI = document.currentFrame - 1;
+            let cFrameI = document.currentFrame;
+            let nFrameI = document.currentFrame + 1;
+
+            if (document.animation.repeat) {
+              if (pFrameI < 0) {
+                pFrameI = document.animation.frames.length - 1;
+              }
+              if (nFrameI >= document.animation.frames.length) {
+                nFrameI = 0;
+              }
+            }
+
+            let pFrame, cFrame, nFrame;
+            if (pFrameI >= 0) {
+              pFrame = document.animation.frames[pFrameI];
+            }
+            cFrame = document.animation.frames[cFrameI];
+            if (nFrameI < document.animation.frames.length) {
+              nFrame = document.animation.frames[nFrameI];
+            }
+
+            document.getElementById("pframe").value = pFrame || "";
+            document.getElementById("cframe").value = cFrame || "";
+            document.getElementById("nframe").value = nFrame || "";
+          }
+
+          function updateTimeLineFrame() {
+            let currentFrameElement = document.querySelector("#timeline .frame.current");
+            if (currentFrameElement) {
+              currentFrameElement.classList.remove("current");
+            }
+            let newCurrentFrameElement = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
+            if (newCurrentFrameElement) {
+              newCurrentFrameElement.classList.add("current");
+            }
+          }
+
+          function frameAnimation() {
+            if (document.isPlaying) {
+              document.currentFrame++;
+              if (document.currentFrame >= document.animation.frames.length) {
+                if (document.animation.repeat) {
+                  document.currentFrame = 0;
+                } else {
+                  document.currentFrame = document.animation.frames.length - 1;
+                  clearInterval(document.timer);
+                }
+              }
+              updateFrame();
+              updateTimeLineFrame();
+            } else {
+              clearInterval(document.timer);
+            }
+          }
+
+          function updateFps() {
+            document.animation.fps = parseInt(document.getElementById("fps").value);
+            if (document.isPlaying) {
+              clearInterval(document.timer);
+              document.timer = setInterval(frameAnimation, 1000 / document.animation.fps);
+            }
+          }
+
+          function playPauseAnimation() {
+            document.isPlaying = !document.isPlaying;
+            if (document.isPlaying) {
+              document.timer = setInterval(frameAnimation, 1000 / document.animation.fps);
+              let cframe = document.getElementById("cframe");
+              cframe.classList.add("playing");
+              cframe.readOnly = true;
+            } else {
+              clearInterval(document.timer);
+              let cframe = document.getElementById("cframe");
+              cframe.classList.remove("playing");
+              cframe.readOnly = false;
+            }
+          }
+
+          function frameItmClick() {
+            document.currentFrame = Array.from(this.parentElement.children).indexOf(this);
+            updateFrame();
+            updateTimeLineFrame();
+          }
+
+          function addFrameLeft() {
+            let frameEle = document.createElement("span");
+            frameEle.classList.add("frame");
+            frameEle.classList.add("empty");
+            frameEle.addEventListener("click", frameItmClick);
+            document.getElementById("timeline").insertBefore(frameEle, document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`));
+            document.animation.frames.splice(document.currentFrame, 0, "");
+            updateFrame();
+            updateContent();
+            updateTimeLineFrame();
+            document.getElementById("cframe").focus();
+          }
+
+          function addFrameRight() {
+            let frameEle = document.createElement("span");
+            frameEle.classList.add("frame");
+            frameEle.classList.add("empty");
+            frameEle.addEventListener("click", frameItmClick);
+            document.getElementById("timeline").insertBefore(frameEle, document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 2})`));
+            document.animation.frames.splice(document.currentFrame + 1, 0, "");
+            document.currentFrame++;
+            updateFrame();
+            updateContent();
+            updateTimeLineFrame();
+            document.getElementById("cframe").focus();
+          }
+
+          function updateFrameItem() {
+            let frameEle = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
+            if (frameEle) {
+              let frameContent = document.getElementById("cframe").value;
+              if (frameContent) {
+                frameEle.classList.remove("empty");
+              } else {
+                frameEle.classList.add("empty");
+              }
+            }
+          }
+
+          function delFrame() {
+            if (document.animation.frames.length > 1) {
+              document.animation.frames.splice(document.currentFrame, 1);
+              let frameEle = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
+              if (frameEle) {
+                frameEle.remove();
+              }
+              if (document.currentFrame >= document.animation.frames.length) {
+                document.currentFrame = document.animation.frames.length - 1;
+              }
+              updateFrame();
+              updateTimeLineFrame();
+              updateContent();
+            }
+          }
+
+          function nextFrame() {
+            document.currentFrame++;
+            if (document.currentFrame >= document.animation.frames.length) {
+              if (document.animation.repeat) {
+                document.currentFrame = 0;
+              } else {
+                document.currentFrame = document.animation.frames.length - 1;
+              }
+            }
+            updateFrame();
+            updateTimeLineFrame();
+          }
+
+          function prevFrame() {
+            document.currentFrame--;
+            if (document.currentFrame < 0) {
+              if (document.animation.repeat) {
+                document.currentFrame = document.animation.frames.length - 1;
+              } else {
+                document.currentFrame = 0;
+              }
+            }
+            updateFrame();
+            updateTimeLineFrame();
+          }
+
+          function updateCurrentFrameContent() {
+            document.animation.frames[document.currentFrame] = document.getElementById("cframe").value;
+            updateFrameItem();
+            updateContent();
+          }
+
+          function stopAnimation() {
+            document.isPlaying = false;
+            clearInterval(document.timer);
+            document.currentFrame = 0;
+            updateFrame();
+            updateTimeLineFrame();
+            let cframe = document.getElementById("cframe");
+            cframe.classList.remove("playing");
+            cframe.readOnly = false;
+          }
+
+          function updateWidth() {
+            let width = parseInt(document.getElementById("width").value);
+            document.animation.width = width;
+            document.getElementById("pframe").cols = width;
+            document.getElementById("nframe").cols = width;
+            document.getElementById("cframe").cols = width;
+            updateContent();
+          }
+
+          function updateHeight() {
+            let height = parseInt(document.getElementById("height").value);
+            document.animation.height = height;
+            document.getElementById("pframe").rows = height;
+            document.getElementById("nframe").rows = height;
+            document.getElementById("cframe").rows = height;
+            updateContent();
+          }
+
+          function updateRepeat() {
+            document.animation.repeat = document.getElementById("repeat").checked;
+            updateContent();
+          }
+
+          function updateTimeline() {
+            let timelineEle = document.getElementById("timeline");
+            timelineEle.innerHTML = "";
+            for (let i = 0; i < document.animation.frames.length; i++) {
+              let frameEle = document.createElement("span");
+              frameEle.classList.add("frame");
+              frameEle.addEventListener("click", frameItmClick);
+              timelineEle.appendChild(frameEle);
+            }
+            updateTimeLineFrame();
+          }
+
+          function readIntoInputs() {
+            document.getElementById("fps").value = document.animation.fps;
+            document.getElementById("width").value = document.animation.width;
+            document.getElementById("height").value = document.animation.height;
+            document.getElementById("repeat").checked = document.animation.repeat;
+            updateWidth();
+            updateHeight();
+            updateTimeline();
+          }
+
+          function init() {
+            document.animation = createNewAnimation();
+            document.isPlaying = false;
+            document.currentFrame = 0;
+            document.timer = null;
+            readIntoInputs();
+            updateFrame();
+            updateContent();
+          }
+
+          document.getElementById("fps").addEventListener("change", updateFps);
+          document.getElementById("play").addEventListener("click", playPauseAnimation);
+          document.getElementById("stop").addEventListener("click", stopAnimation);
+          //document.getElementById("addframe").addEventListener("click", addFrame);
+          document.getElementById("addLeftframe").addEventListener("click", addFrameLeft);
+          document.getElementById("addRightframe").addEventListener("click", addFrameRight);
+          document.getElementById("delframe").addEventListener("click", delFrame);
+          document.getElementById("next").addEventListener("click", nextFrame);
+          document.getElementById("prev").addEventListener("click", prevFrame);
+          document.getElementById("cframe").addEventListener("input", updateCurrentFrameContent);
+          document.getElementById("width").addEventListener("change", updateWidth);
+          document.getElementById("height").addEventListener("change", updateHeight);
+          document.getElementById("repeat").addEventListener("change", updateRepeat);
+          document.getElementById("content").addEventListener("input", updateAnimationFromContent);
+
+          init();
+        </script>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
