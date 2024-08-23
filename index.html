@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASCII Art Animator</title>
+  <title>ASCII Art Animator - UnknownAnimation</title>
   <style>
     html, body {
       margin: 0;
@@ -13,6 +13,10 @@
       overflow: auto;
       font-family: Arial, Helvetica, sans-serif;
       background: #f0f0f0;
+    }
+
+    label {
+      user-select: none;
     }
 
     textarea {
@@ -110,6 +114,7 @@
       text-align: center;
       display: block;
       color: #017;
+      user-select: none;
     }
 
     h1 { font-size: 30px; }
@@ -118,6 +123,10 @@
     h4 { font-size: 16px; }
     h5 { font-size: 14px; }
     h6 { font-size: 12px; }
+
+    #anim-name {
+      user-select: text;
+    }
 
     #timeline {
       text-align: center;
@@ -175,7 +184,7 @@
         <table border="0" cellspacing="0" cellpadding="0">
           <tr>
             <td colspan="3" align="center">
-              <h1>ASCII Art Animator</h1>
+              <h1>ASCII Art Animator - <span id="anim-name">UnknownAnimation</span></h1>
             </td>
           </tr>
           <tr>
@@ -228,9 +237,15 @@
           </tr>
           <tr>
             <td align="center">
-              <button id="addLeftframe">Add Frame Left to Current</button>
               <button id="delframe">Delete current Frame</button>
+              <br />
+              <button id="addLeftframe">Add Frame Left to Current</button>
               <button id="addRightframe">Add Frame Right to Current</button>
+              <br />
+              <Label for="show-prev-frame">Show Previous Frame:</Label>
+              <input type="checkbox" id="show-prev-frame" checked />
+              <label for="show-next-frame">Show Next Frame:</label>
+              <input type="checkbox" id="show-next-frame" checked />
             </td>
           </tr>
           <tr>
@@ -462,6 +477,8 @@
 
     function updateName() {
       document.animation.name = document.getElementById("name").value;
+      document.getElementById("anim-name").textContent = document.animation.name;
+      document.title = "ASCII Art Animator - " + document.animation.name;
       updateContent();
     }
 
@@ -629,6 +646,8 @@
 
     function readIntoInputs() {
       document.getElementById("name").value = document.animation.name;
+      document.getElementById("anim-name").textContent = document.animation.name;
+      document.title = "ASCII Art Animator - " + document.animation.name;
       document.getElementById("fps").value = document.animation.fps;
       document.getElementById("width").value = document.animation.width;
       document.getElementById("height").value = document.animation.height;
@@ -650,6 +669,24 @@
       document.getElementById("copy-year").textContent = new Date().getFullYear();
     }
 
+    function updateNextFramePreview() {
+      let nframe = document.getElementById("nframe");
+      if (document.getElementById("show-next-frame").checked) {
+        nframe.style.color = "#00f";
+      } else {
+        nframe.style.color = "#fff";
+      }
+    }
+
+    function updatePrevFramePreview() {
+      let pframe = document.getElementById("pframe");
+      if (document.getElementById("show-prev-frame").checked) {
+        pframe.style.color = "#f00";
+      } else {
+        pframe.style.color = "#fff";
+      }
+    }
+
     document.getElementById("name").addEventListener("input", updateName);
     document.getElementById("fps").addEventListener("change", updateFps);
     document.getElementById("play").addEventListener("click", playPauseAnimation);
@@ -665,6 +702,8 @@
     document.getElementById("repeat").addEventListener("change", updateRepeat);
     document.getElementById("content").addEventListener("input", updateAnimationFromContent);
     document.getElementById("output-type").addEventListener("change", updateOutput);
+    document.getElementById("show-next-frame").addEventListener("change", updateNextFramePreview);
+    document.getElementById("show-prev-frame").addEventListener("change", updatePrevFramePreview);
 
     init();
   </script>
