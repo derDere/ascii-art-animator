@@ -22,6 +22,9 @@
       margin: 0;
       resize: none;
       outline: none;
+      word-break: keep-all;
+      white-space: preserve nowrap;
+      scrollbar-width: thin;
     }
 
     #preview {
@@ -61,12 +64,29 @@
     }
 
     #form,
-    #content {
+    #content,
+    #output {
       width: 300px;
-      height: 500px;
       margin: 0 20px;
       border: 1px solid #aaa;
       background: #fff;
+    }
+
+    #form { height: 170px; border-bottom: 0; }
+    #content { height: 330px; }
+    #output { height: 470px; }
+
+    #output-type {
+      width: 200px;
+      height: 25px;
+      margin-bottom: 5px;
+      border: 1px solid #aaa;
+      outline: none;
+    }
+    label[for="output-type"] {
+      width: 100px;
+      text-align: right;
+      margin-left: 25px;
     }
 
     #form input {
@@ -131,6 +151,20 @@
     #timeline .frame:hover.frame.empty {
       background-color: #7F7;
     }
+
+    .copyright {
+      position: fixed;
+      bottom: 5px;
+      left: 5px;
+      color: #000;
+    }
+
+    a.home {
+      position: fixed;
+      bottom: 5px;
+      left: 130px;
+      color: #07f;
+    }
   </style>
 </head>
 <body>
@@ -148,6 +182,9 @@
             <td rowspan="3">
               <div id="form">
                 <h2>Settings</h2>
+                <label for="name">Name:</label>
+                <input type="text" id="name" value="UnknownAnimation" />
+                <br />
                 <label for="fps">FPS:</label>
                 <input type="number" id="fps" value="5" min="1" max="240" step="1" />
                 <br />
@@ -161,6 +198,7 @@
                 <input type="checkbox" id="repeat" checked />
                 <br />
               </div>
+              <textarea id="content"></textarea>
             </td>
             <td align="center">
               <div id="preview">
@@ -170,7 +208,14 @@
               </div>
             </td>
             <td rowspan="3">
-              <textarea id="content"></textarea>
+              <label for="output-type">Output Type:</label>
+              <select id="output-type">
+                <option value="json">JSON</option>
+                <option value="html">HTML</option>
+                <option value="c++">C++</option>
+                <option value="c#">C#</option>
+              </select><br />
+              <textarea id="output" readonly></textarea>
             </td>
           </tr>
           <tr>
@@ -195,304 +240,482 @@
           </tr>
         </table>
 
-        <script type="text/javascript">
-          function createNewAnimation() {
-            let obj = {
-              fps: 15,
-              width: 7,
-              height: 3,
-              repeat: true,
-              frames: [
-                "   _   \n..o0o..\n   '   ",
-                "    _  \n...o0o.\n    '  ",
-                "     _ \n....o0o\n     ' ",
-                "      _\no....o0\n      '",
-                "_      \n0o....o\n'      ",
-                " _     \no0o....\n '     ",
-                "  _    \n.o0o...\n  '    ",
-              ]
-            };
-            return obj;
-          }
-
-          function updateContent() {
-            let contentTxb = document.getElementById("content");
-            let json = JSON.stringify(document.animation, null, 2);
-            contentTxb.value = json;
-          }
-
-          function updateAnimationFromContent() {
-            let contentTxb = document.getElementById("content");
-            let json = contentTxb.value;
-            try {
-              let obj = JSON.parse(json);
-              document.animation = obj;
-              readIntoInputs();
-              updateFrame();
-              updateTimeline();
-            } catch (e) {
-              console.error(e);
-            }
-          }
-
-          function updateFrame() {
-            let pFrameI = document.currentFrame - 1;
-            let cFrameI = document.currentFrame;
-            let nFrameI = document.currentFrame + 1;
-
-            if (document.animation.repeat) {
-              if (pFrameI < 0) {
-                pFrameI = document.animation.frames.length - 1;
-              }
-              if (nFrameI >= document.animation.frames.length) {
-                nFrameI = 0;
-              }
-            }
-
-            let pFrame, cFrame, nFrame;
-            if (pFrameI >= 0) {
-              pFrame = document.animation.frames[pFrameI];
-            }
-            cFrame = document.animation.frames[cFrameI];
-            if (nFrameI < document.animation.frames.length) {
-              nFrame = document.animation.frames[nFrameI];
-            }
-
-            document.getElementById("pframe").value = pFrame || "";
-            document.getElementById("cframe").value = cFrame || "";
-            document.getElementById("nframe").value = nFrame || "";
-          }
-
-          function updateTimeLineFrame() {
-            let currentFrameElement = document.querySelector("#timeline .frame.current");
-            if (currentFrameElement) {
-              currentFrameElement.classList.remove("current");
-            }
-            let newCurrentFrameElement = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
-            if (newCurrentFrameElement) {
-              newCurrentFrameElement.classList.add("current");
-            }
-          }
-
-          function frameAnimation() {
-            if (document.isPlaying) {
-              document.currentFrame++;
-              if (document.currentFrame >= document.animation.frames.length) {
-                if (document.animation.repeat) {
-                  document.currentFrame = 0;
-                } else {
-                  document.currentFrame = document.animation.frames.length - 1;
-                  clearInterval(document.timer);
-                }
-              }
-              updateFrame();
-              updateTimeLineFrame();
-            } else {
-              clearInterval(document.timer);
-            }
-          }
-
-          function updateFps() {
-            document.animation.fps = parseInt(document.getElementById("fps").value);
-            if (document.isPlaying) {
-              clearInterval(document.timer);
-              document.timer = setInterval(frameAnimation, 1000 / document.animation.fps);
-            }
-          }
-
-          function playPauseAnimation() {
-            document.isPlaying = !document.isPlaying;
-            if (document.isPlaying) {
-              document.timer = setInterval(frameAnimation, 1000 / document.animation.fps);
-              let cframe = document.getElementById("cframe");
-              cframe.classList.add("playing");
-              cframe.readOnly = true;
-            } else {
-              clearInterval(document.timer);
-              let cframe = document.getElementById("cframe");
-              cframe.classList.remove("playing");
-              cframe.readOnly = false;
-            }
-          }
-
-          function frameItmClick() {
-            document.currentFrame = Array.from(this.parentElement.children).indexOf(this);
-            updateFrame();
-            updateTimeLineFrame();
-          }
-
-          function addFrameLeft() {
-            let frameEle = document.createElement("span");
-            frameEle.classList.add("frame");
-            frameEle.classList.add("empty");
-            frameEle.addEventListener("click", frameItmClick);
-            document.getElementById("timeline").insertBefore(frameEle, document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`));
-            document.animation.frames.splice(document.currentFrame, 0, "");
-            updateFrame();
-            updateContent();
-            updateTimeLineFrame();
-            document.getElementById("cframe").focus();
-          }
-
-          function addFrameRight() {
-            let frameEle = document.createElement("span");
-            frameEle.classList.add("frame");
-            frameEle.classList.add("empty");
-            frameEle.addEventListener("click", frameItmClick);
-            document.getElementById("timeline").insertBefore(frameEle, document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 2})`));
-            document.animation.frames.splice(document.currentFrame + 1, 0, "");
-            document.currentFrame++;
-            updateFrame();
-            updateContent();
-            updateTimeLineFrame();
-            document.getElementById("cframe").focus();
-          }
-
-          function updateFrameItem() {
-            let frameEle = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
-            if (frameEle) {
-              let frameContent = document.getElementById("cframe").value;
-              if (frameContent) {
-                frameEle.classList.remove("empty");
-              } else {
-                frameEle.classList.add("empty");
-              }
-            }
-          }
-
-          function delFrame() {
-            if (document.animation.frames.length > 1) {
-              document.animation.frames.splice(document.currentFrame, 1);
-              let frameEle = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
-              if (frameEle) {
-                frameEle.remove();
-              }
-              if (document.currentFrame >= document.animation.frames.length) {
-                document.currentFrame = document.animation.frames.length - 1;
-              }
-              updateFrame();
-              updateTimeLineFrame();
-              updateContent();
-            }
-          }
-
-          function nextFrame() {
-            document.currentFrame++;
-            if (document.currentFrame >= document.animation.frames.length) {
-              if (document.animation.repeat) {
-                document.currentFrame = 0;
-              } else {
-                document.currentFrame = document.animation.frames.length - 1;
-              }
-            }
-            updateFrame();
-            updateTimeLineFrame();
-          }
-
-          function prevFrame() {
-            document.currentFrame--;
-            if (document.currentFrame < 0) {
-              if (document.animation.repeat) {
-                document.currentFrame = document.animation.frames.length - 1;
-              } else {
-                document.currentFrame = 0;
-              }
-            }
-            updateFrame();
-            updateTimeLineFrame();
-          }
-
-          function updateCurrentFrameContent() {
-            document.animation.frames[document.currentFrame] = document.getElementById("cframe").value;
-            updateFrameItem();
-            updateContent();
-          }
-
-          function stopAnimation() {
-            document.isPlaying = false;
-            clearInterval(document.timer);
-            document.currentFrame = 0;
-            updateFrame();
-            updateTimeLineFrame();
-            let cframe = document.getElementById("cframe");
-            cframe.classList.remove("playing");
-            cframe.readOnly = false;
-          }
-
-          function updateWidth() {
-            let width = parseInt(document.getElementById("width").value);
-            document.animation.width = width;
-            document.getElementById("pframe").cols = width;
-            document.getElementById("nframe").cols = width;
-            document.getElementById("cframe").cols = width;
-            updateContent();
-          }
-
-          function updateHeight() {
-            let height = parseInt(document.getElementById("height").value);
-            document.animation.height = height;
-            document.getElementById("pframe").rows = height;
-            document.getElementById("nframe").rows = height;
-            document.getElementById("cframe").rows = height;
-            updateContent();
-          }
-
-          function updateRepeat() {
-            document.animation.repeat = document.getElementById("repeat").checked;
-            updateContent();
-          }
-
-          function updateTimeline() {
-            let timelineEle = document.getElementById("timeline");
-            timelineEle.innerHTML = "";
-            for (let i = 0; i < document.animation.frames.length; i++) {
-              let frameEle = document.createElement("span");
-              frameEle.classList.add("frame");
-              frameEle.addEventListener("click", frameItmClick);
-              timelineEle.appendChild(frameEle);
-            }
-            updateTimeLineFrame();
-          }
-
-          function readIntoInputs() {
-            document.getElementById("fps").value = document.animation.fps;
-            document.getElementById("width").value = document.animation.width;
-            document.getElementById("height").value = document.animation.height;
-            document.getElementById("repeat").checked = document.animation.repeat;
-            updateWidth();
-            updateHeight();
-            updateTimeline();
-          }
-
-          function init() {
-            document.animation = createNewAnimation();
-            document.isPlaying = false;
-            document.currentFrame = 0;
-            document.timer = null;
-            readIntoInputs();
-            updateFrame();
-            updateContent();
-          }
-
-          document.getElementById("fps").addEventListener("change", updateFps);
-          document.getElementById("play").addEventListener("click", playPauseAnimation);
-          document.getElementById("stop").addEventListener("click", stopAnimation);
-          //document.getElementById("addframe").addEventListener("click", addFrame);
-          document.getElementById("addLeftframe").addEventListener("click", addFrameLeft);
-          document.getElementById("addRightframe").addEventListener("click", addFrameRight);
-          document.getElementById("delframe").addEventListener("click", delFrame);
-          document.getElementById("next").addEventListener("click", nextFrame);
-          document.getElementById("prev").addEventListener("click", prevFrame);
-          document.getElementById("cframe").addEventListener("input", updateCurrentFrameContent);
-          document.getElementById("width").addEventListener("change", updateWidth);
-          document.getElementById("height").addEventListener("change", updateHeight);
-          document.getElementById("repeat").addEventListener("change", updateRepeat);
-          document.getElementById("content").addEventListener("input", updateAnimationFromContent);
-
-          init();
-        </script>
       </td>
     </tr>
   </table>
+  <span class="copyright">&copy; derDere <span id="copy-year"></span></span>
+  <a class="home" href="https://github.com/derdere/ascii-art-animator/" title="View on GitHub">View on GitHub</a>
+
+
+  <script type="text/javascript">
+    function createNewAnimation() {
+      let obj = {
+        name: "NewAnimation",
+        fps: 15,
+        width: 7,
+        height: 3,
+        repeat: true,
+        frames: [
+          "   _   \n..o0o..\n   '   ",
+          "    _  \n...o0o.\n    '  ",
+          "     _ \n....o0o\n     ' ",
+          "      _\no....o0\n      '",
+          "_      \n0o....o\n'      ",
+          " _     \no0o....\n '     ",
+          "  _    \n.o0o...\n  '    ",
+        ]
+      };
+      return obj;
+    }
+
+    function toHtml() {
+      let html = "<!DOCTYPE html>\n";
+      html += "<html>\n";
+      html += "<head>\n";
+      html += "<title>" + document.animation.name + "</title>\n";
+      html += "<style>\n";
+      html += "  html, body {\n";
+      html += "    white-space: preserve;\n";
+      html += "    user-select: none;\n";
+      html += "    font-family: monospace;\n";
+      html += "    margin: 0;\n";
+      html += "    padding: 0;\n";
+      html += "    border: 0;\n";
+      html += "    overflow: hidden;\n";
+      html += "  }\n";
+      html += "</style>\n";
+      html += "</head>\n";
+      html += "<body>\n";
+      html += "<script>\n";
+      html += "let animation = " + JSON.stringify(document.animation, null, 2) + ";\n";
+      html += "let currentFrame = 0;\n";
+      html += "let timer = null;\n";
+      html += "function frameAnimation() {\n";
+      html += "  document.body.textContent = animation.frames[currentFrame];\n";
+      html += "  currentFrame++;\n";
+      html += "  if (currentFrame >= animation.frames.length) {\n";
+      html += "    if (animation.repeat) {\n";
+      html += "      currentFrame = 0;\n";
+      html += "    } else {\n";
+      html += "      clearInterval(timer);\n";
+      html += "      timer = null;\n";
+      html += "      currentFrame = 0;\n";
+      html += "    }\n";
+      html += "  }\n";
+      html += "}\n";
+      html += "function playPauseAnimation() {\n";
+      html += "  if (timer) {\n";
+      html += "    clearInterval(timer);\n";
+      html += "    timer = null;\n";
+      html += "  } else {\n";
+      html += "    timer = setInterval(frameAnimation, 1000 / animation.fps);\n";
+      html += "  }\n";
+      html += "}\n";
+      html += "document.addEventListener('click', playPauseAnimation);\n";
+      html += "playPauseAnimation();\n";
+      html += "\u003C/script>\n";
+      html += "</body>\n";
+      html += "</html>\n";
+      return html;
+    }
+
+    function toCpp() {
+      let constName = document.animation.name.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+      let cpp = "#ifndef " + constName + "_H\n";
+      cpp += "#define " + constName + "_H\n";
+      cpp += "\n";
+      cpp += "#define " + constName + "_FPS " + document.animation.fps + "\n";
+      cpp += "#define " + constName + "_WIDTH " + document.animation.width + "\n";
+      cpp += "#define " + constName + "_HEIGHT " + document.animation.height + "\n";
+      cpp += "#define " + constName + "_REPEAT " + (document.animation.repeat ? "true" : "false") + "\n";
+      cpp += "\n";
+      cpp += "const char* " + constName + "_FRAMES[] = ";
+      for (let i = 0; i < document.animation.frames.length; i++) {
+        for(let line of document.animation.frames[i].split("\n")) {
+          cpp += "  \"" + line.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"\n";
+        }
+        cpp += "\n";
+      }
+      cpp = cpp.slice(0, -1);
+      cpp += ";\n";
+      cpp += "\n";
+      cpp += "#endif\n";
+      return cpp;
+    }
+
+    function toCSharp() {
+      let className = document.animation.name.replace(/[^A-Za-z0-9]/g, "");
+      let csharp = "using System;\n";
+      csharp += "\n";
+      csharp += "public static class " + className + " {\n";
+      csharp += "  public const int FPS = " + document.animation.fps + ";\n";
+      csharp += "  public const int Width = " + document.animation.width + ";\n";
+      csharp += "  public const int Height = " + document.animation.height + ";\n";
+      csharp += "  public const bool Repeat = " + (document.animation.repeat ? "true" : "false") + ";\n";
+      csharp += "  public static readonly string[] Frames = {\n";
+      for (let i = 0; i < document.animation.frames.length; i++) {
+        csharp += "    \"" + document.animation.frames[i].replace(/\\/g, "\\\\").replace(/"/g, "\\\"").replace(/\n/g,"\\n") + "\",\n";
+      }
+      csharp += "  };\n";
+      csharp += "}\n";
+      return csharp;
+    }
+
+    function updateOutput() {
+      let outputType = document.getElementById("output-type").value;
+      let output = "";
+      switch (outputType) {
+        case "json":
+          output = JSON.stringify(document.animation, null, 2);
+          break;
+        case "html":
+          output = toHtml();
+          break;
+        case "c++":
+          output = toCpp();
+          break;
+        case "c#":
+          output = toCSharp();
+          break;
+      }
+      document.getElementById("output").value = output;
+    }
+
+    function updateContent() {
+      let contentTxb = document.getElementById("content");
+      let json = JSON.stringify(document.animation, null, 2);
+      contentTxb.value = json;
+      updateOutput();
+    }
+
+    function updateAnimationFromContent() {
+      let contentTxb = document.getElementById("content");
+      let json = contentTxb.value;
+      try {
+        let obj = JSON.parse(json);
+        document.animation = obj;
+        readIntoInputs();
+        updateFrame();
+        updateTimeline();
+        updateOutput();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function updateFrame() {
+      let pFrameI = document.currentFrame - 1;
+      let cFrameI = document.currentFrame;
+      let nFrameI = document.currentFrame + 1;
+
+      if (document.animation.repeat) {
+        if (pFrameI < 0) {
+          pFrameI = document.animation.frames.length - 1;
+        }
+        if (nFrameI >= document.animation.frames.length) {
+          nFrameI = 0;
+        }
+      }
+
+      let pFrame, cFrame, nFrame;
+      if (pFrameI >= 0) {
+        pFrame = document.animation.frames[pFrameI];
+      }
+      cFrame = document.animation.frames[cFrameI];
+      if (nFrameI < document.animation.frames.length) {
+        nFrame = document.animation.frames[nFrameI];
+      }
+
+      document.getElementById("pframe").value = pFrame || "";
+      document.getElementById("cframe").value = cFrame || "";
+      document.getElementById("nframe").value = nFrame || "";
+    }
+
+    function updateTimeLineFrame() {
+      let currentFrameElement = document.querySelector("#timeline .frame.current");
+      if (currentFrameElement) {
+        currentFrameElement.classList.remove("current");
+      }
+      let newCurrentFrameElement = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
+      if (newCurrentFrameElement) {
+        newCurrentFrameElement.classList.add("current");
+      }
+    }
+
+    function frameAnimation() {
+      if (document.isPlaying) {
+        document.currentFrame++;
+        if (document.currentFrame >= document.animation.frames.length) {
+          if (document.animation.repeat) {
+            document.currentFrame = 0;
+          } else {
+            document.currentFrame = document.animation.frames.length - 1;
+            clearInterval(document.timer);
+          }
+        }
+        updateFrame();
+        updateTimeLineFrame();
+      } else {
+        clearInterval(document.timer);
+      }
+    }
+
+    function updateName() {
+      document.animation.name = document.getElementById("name").value;
+      updateContent();
+    }
+
+    function updateFps() {
+      document.animation.fps = parseInt(document.getElementById("fps").value);
+      if (document.isPlaying) {
+        clearInterval(document.timer);
+        document.timer = setInterval(frameAnimation, 1000 / document.animation.fps);
+      }
+    }
+
+    function playPauseAnimation() {
+      document.isPlaying = !document.isPlaying;
+      if (document.isPlaying) {
+        document.timer = setInterval(frameAnimation, 1000 / document.animation.fps);
+        let cframe = document.getElementById("cframe");
+        cframe.classList.add("playing");
+        cframe.readOnly = true;
+      } else {
+        clearInterval(document.timer);
+        let cframe = document.getElementById("cframe");
+        cframe.classList.remove("playing");
+        cframe.readOnly = false;
+      }
+    }
+
+    function frameItmClick() {
+      document.currentFrame = Array.from(this.parentElement.children).indexOf(this);
+      updateFrame();
+      updateTimeLineFrame();
+    }
+
+    function addFrameLeft() {
+      let frameEle = document.createElement("span");
+      frameEle.classList.add("frame");
+      frameEle.classList.add("empty");
+      frameEle.addEventListener("click", frameItmClick);
+      document.getElementById("timeline").insertBefore(frameEle, document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`));
+      document.animation.frames.splice(document.currentFrame, 0, "");
+      updateFrame();
+      updateContent();
+      updateTimeLineFrame();
+      document.getElementById("cframe").focus();
+    }
+
+    function addFrameRight() {
+      let frameEle = document.createElement("span");
+      frameEle.classList.add("frame");
+      frameEle.classList.add("empty");
+      frameEle.addEventListener("click", frameItmClick);
+      document.getElementById("timeline").insertBefore(frameEle, document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 2})`));
+      document.animation.frames.splice(document.currentFrame + 1, 0, "");
+      document.currentFrame++;
+      updateFrame();
+      updateContent();
+      updateTimeLineFrame();
+      document.getElementById("cframe").focus();
+    }
+
+    function updateFrameItem() {
+      let frameEle = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
+      if (frameEle) {
+        let frameContent = document.getElementById("cframe").value;
+        if (frameContent) {
+          frameEle.classList.remove("empty");
+        } else {
+          frameEle.classList.add("empty");
+        }
+      }
+    }
+
+    function delFrame() {
+      if (document.animation.frames.length > 1) {
+        document.animation.frames.splice(document.currentFrame, 1);
+        let frameEle = document.querySelector(`#timeline .frame:nth-child(${document.currentFrame + 1})`);
+        if (frameEle) {
+          frameEle.remove();
+        }
+        if (document.currentFrame >= document.animation.frames.length) {
+          document.currentFrame = document.animation.frames.length - 1;
+        }
+        updateFrame();
+        updateTimeLineFrame();
+        updateContent();
+      }
+    }
+
+    function nextFrame() {
+      document.currentFrame++;
+      if (document.currentFrame >= document.animation.frames.length) {
+        if (document.animation.repeat) {
+          document.currentFrame = 0;
+        } else {
+          document.currentFrame = document.animation.frames.length - 1;
+        }
+      }
+      updateFrame();
+      updateTimeLineFrame();
+    }
+
+    function prevFrame() {
+      document.currentFrame--;
+      if (document.currentFrame < 0) {
+        if (document.animation.repeat) {
+          document.currentFrame = document.animation.frames.length - 1;
+        } else {
+          document.currentFrame = 0;
+        }
+      }
+      updateFrame();
+      updateTimeLineFrame();
+    }
+
+    function updateCurrentFrameContent() {
+      document.animation.frames[document.currentFrame] = document.getElementById("cframe").value;
+      updateFrameItem();
+      updateContent();
+    }
+
+    function stopAnimation() {
+      document.isPlaying = false;
+      clearInterval(document.timer);
+      document.currentFrame = 0;
+      updateFrame();
+      updateTimeLineFrame();
+      let cframe = document.getElementById("cframe");
+      cframe.classList.remove("playing");
+      cframe.readOnly = false;
+    }
+
+    function updateWidth() {
+      let width = parseInt(document.getElementById("width").value);
+      document.animation.width = width;
+      document.getElementById("pframe").cols = width;
+      document.getElementById("nframe").cols = width;
+      document.getElementById("cframe").cols = width;
+      updateContent();
+    }
+
+    function updateHeight() {
+      let height = parseInt(document.getElementById("height").value);
+      document.animation.height = height;
+      document.getElementById("pframe").rows = height;
+      document.getElementById("nframe").rows = height;
+      document.getElementById("cframe").rows = height;
+      updateContent();
+    }
+
+    function updateRepeat() {
+      document.animation.repeat = document.getElementById("repeat").checked;
+      updateContent();
+    }
+
+    function updateTimeline() {
+      let timelineEle = document.getElementById("timeline");
+      timelineEle.innerHTML = "";
+      for (let i = 0; i < document.animation.frames.length; i++) {
+        let frameEle = document.createElement("span");
+        frameEle.classList.add("frame");
+        frameEle.addEventListener("click", frameItmClick);
+        timelineEle.appendChild(frameEle);
+      }
+      updateTimeLineFrame();
+    }
+
+    function readIntoInputs() {
+      document.getElementById("name").value = document.animation.name;
+      document.getElementById("fps").value = document.animation.fps;
+      document.getElementById("width").value = document.animation.width;
+      document.getElementById("height").value = document.animation.height;
+      document.getElementById("repeat").checked = document.animation.repeat;
+      updateWidth();
+      updateHeight();
+      updateTimeline();
+    }
+
+    function init() {
+      document.animation = createNewAnimation();
+      document.isPlaying = false;
+      document.currentFrame = 0;
+      document.timer = null;
+      readIntoInputs();
+      updateFrame();
+      updateContent();
+
+      document.getElementById("copy-year").textContent = new Date().getFullYear();
+    }
+
+    document.getElementById("name").addEventListener("input", updateName);
+    document.getElementById("fps").addEventListener("change", updateFps);
+    document.getElementById("play").addEventListener("click", playPauseAnimation);
+    document.getElementById("stop").addEventListener("click", stopAnimation);
+    document.getElementById("addLeftframe").addEventListener("click", addFrameLeft);
+    document.getElementById("addRightframe").addEventListener("click", addFrameRight);
+    document.getElementById("delframe").addEventListener("click", delFrame);
+    document.getElementById("next").addEventListener("click", nextFrame);
+    document.getElementById("prev").addEventListener("click", prevFrame);
+    document.getElementById("cframe").addEventListener("input", updateCurrentFrameContent);
+    document.getElementById("width").addEventListener("change", updateWidth);
+    document.getElementById("height").addEventListener("change", updateHeight);
+    document.getElementById("repeat").addEventListener("change", updateRepeat);
+    document.getElementById("content").addEventListener("input", updateAnimationFromContent);
+    document.getElementById("output-type").addEventListener("change", updateOutput);
+
+    init();
+  </script>
 </body>
 </html>
+
+<!-- REAMDE.md
+
+# ASCII Art Animator
+
+![Screenshot](screenshot.png)
+
+ASCII Art Animator is a simple web application that allows you to create and animate ASCII art.
+It overlays the current frame with the previous and next frames to give you a better idea of the animation.
+It starts with a default animation that you can modify and save as JSON.
+The animation is not saved automatically, so you have to copy the content of the text area to save it.
+By changing the content of the text area, you can load an animation from JSON.
+
+This application is written in HTML, CSS, and JavaScript and is stored in a single HTML file so you can use it offline.
+
+You can use it online at [ASCII Art Animator](https://derdere.github.io/ascii-art-animator/)
+
+
+## Features
+
+- Add frames to the animation
+- Play/Pause the animation
+- Stop the animation
+- Delete a frame
+- Go to the next frame
+- Go to the previous frame
+- Change the FPS
+- Change the width and height of the frames
+- Repeat the animation
+- Displays the animation as json
+- Load an animation from json
+- Export the animation as json, html, c++, or c# code
+
+## License
+
+GNU General Public License v3.0
+[View License](LICENSE)
+
+## Author
+
+derDere
+[View GitHub Profile](https://github.com/derdere)
+
+## View on GitHub
+
+[View on GitHub](https://github.com/derdere/ascii-art-animator/)
+
+
+-->
