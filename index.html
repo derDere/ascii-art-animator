@@ -741,6 +741,7 @@
         clearInterval(document.timer);
         document.timer = setInterval(frameAnimation, 1000 / document.animation.fps);
       }
+      updateContent();
     }
 
     function playPauseAnimation() {
