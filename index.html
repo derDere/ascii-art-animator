@@ -483,7 +483,7 @@
               <button id="addLeftframe" title="(Alt+Num4)">Add Frame Left to Current</button>
               <button id="addRightframe" title="(Alt+Num6)">Add Frame Right to Current</button>
               <br />
-              <button id="delframe" title="(Ctrl+Num2)">Delete current Frame</button>
+              <button id="delframe" title="(Alt+Num2)">Delete current Frame</button>
               <br />
               <Label for="show-prev-frame">Show Previous Frame:</Label>
               <input type="checkbox" id="show-prev-frame" checked />
@@ -977,38 +977,53 @@
       }
     }
 
+    function animateButtonPress(buttonID) {
+      let button = document.getElementById(buttonID);
+      button.style.transform = "scale(0.9)";
+      setTimeout(() => {
+        button.style.transform = "scale(1)";
+      }, 100);
+    }
+
     function workShortCuts(event) {
       // do if elses and switches and always cancel the event if a shortcut is used
       if (event.ctrlKey) {
         switch (event.key) {
           case "5":
+            animateButtonPress("play");
             playPauseAnimation();
             event.preventDefault();
             break;
           case "8":
+            animateButtonPress("stop");
             stopAnimation();
             event.preventDefault();
             break;
           case "4":
+            animateButtonPress("prev");
             prevFrame();
             event.preventDefault();
             break;
           case "6":
+            animateButtonPress("next");
             nextFrame();
-            event.preventDefault();
-            break;
-          case "2":
-            delFrame();
             event.preventDefault();
             break;
         }
       } else if (event.altKey) {
         switch (event.key) {
+          case "2":
+            animateButtonPress("delframe");
+            delFrame();
+            event.preventDefault();
+            break;
           case "4":
+            animateButtonPress("addLeftframe");
             addFrameLeft();
             event.preventDefault();
             break;
           case "6":
+            animateButtonPress("addRightframe");
             addFrameRight();
             event.preventDefault();
             break;
