@@ -27,6 +27,11 @@ You can use it online at [ASCII Art Animator](https://derdere.github.io/ascii-ar
 - Displays the animation as json
 - Load an animation from json
 - Export the animation as json, html, c++, or c# code
+- Change the theme
+- Shortcuts for play/pause, stop, next frame, previous frame, delete frame, add frame left, and add frame right
+- Show/hide the previous and next frame in the preview
+- Store the animation in the local storage
+- Store the theme in the local storage
 
 ## License
 

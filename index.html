@@ -17,6 +17,9 @@
 
     label {
       user-select: none;
+      font-size: 12px;
+      line-height: 25px;
+      vertical-align: middle;
     }
 
     textarea {
@@ -76,15 +79,29 @@
       background: #fff;
     }
 
-    #form { height: 170px; border-bottom: 0; }
-    #content { height: 330px; }
+    #form { height: 190px; border-bottom: 0; }
+    #content { height: 310px; }
     #output { height: 470px; }
+
+    input, select, button {
+      height: 25px;
+      margin-bottom: 5px;
+      border: 1px solid #aaa;
+      outline: none;
+      color: #000;
+    }
+    input {
+      height: 20px;
+      margin-bottom: 3px;
+    }
+    input[type="checkbox"] {
+      height: 15px;
+    }
 
     #output-type {
       width: 200px;
       height: 25px;
       margin-bottom: 5px;
-      border: 1px solid #aaa;
       outline: none;
     }
     label[for="output-type"] {
@@ -174,6 +191,232 @@
       left: 130px;
       color: #07f;
     }
+
+    #theme {
+      position: fixed;
+      top: 5px;
+      right: 5px;
+      width: 100px;
+    }
+
+    label[for="theme"] {
+      position: fixed;
+      top: 5px;
+      right: 110px;
+    }
+
+    /* Dark Theme ================================= */
+    .dark {
+      background: #272727;
+      color: #e4e4e4;
+    }
+    .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+      color: #69afff;
+    }
+    .dark a {
+      color: #92cde9;
+    }
+    .dark .copyright {
+      color: #e4e4e4;
+    }
+    .dark #form, .dark #content, .dark #output {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
+    .dark #pframe, .dark #nframe {
+      background-color: #000;
+      color: #f00;
+    }
+    .dark #nframe {
+      background-color: rgba(0, 0, 0, 0.5);;
+      color: #0f0;
+    }
+    .dark #cframe {
+      background-color: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      border: 1px solid #444;
+    }
+    .dark #cframe.playing {
+      background-color: rgba(0, 0, 0, 1);
+    }
+    .dark #timeline .frame {
+      background-color: #444;
+      border: 1px solid #666;
+    }
+    .dark #timeline .frame.current {
+      border: 2px solid #005ac2;
+      background: #518bff;
+    }
+    .dark #timeline .frame.empty {
+      background-color: #000;
+    }
+    .dark #timeline .frame:hover {
+      background-color: #757575;
+    }
+    .dark #timeline .frame.current:hover {
+      background-color: #a3c2ff;
+    }
+    .dark #timeline .frame.empty:hover {
+      background-color: #333;
+    }
+    .dark input, .dark select, .dark button {
+      background: #444;
+      color: #fff;
+      border: 1px solid #666;
+    }
+    .dark #form input:hover {
+      background: #4d3e2d;
+      accent-color: #f70;
+    }
+    .dark ::selection {
+      background: #a2cdff;
+      color: #000000;
+    }
+    /* Dark Theme END =============================*/
+
+
+    /* Matrix Theme ================================= */
+    .matrix {
+      background: #000000;
+      color: #00b100;
+    }
+    .matrix h1, .matrix h2, .matrix h3, .matrix h4, .matrix h5, .matrix h6 {
+      color: #52ff52;
+    }
+    .matrix a {
+      color: #00ff6a;
+    }
+    .matrix .copyright {
+      color: #00b100;
+    }
+    .matrix #form, .matrix #content, .matrix #output {
+      background: #010;
+      color: #0f0;
+      border: 1px solid #050;
+    }
+    .matrix #pframe, .matrix #nframe {
+      background-color: #000;
+      color: #f00;
+    }
+    .matrix #nframe {
+      background-color: rgba(0, 0, 0, 0.5);;
+      color: #00ffff;
+    }
+    .matrix #cframe {
+      background-color: rgba(0, 0, 0, 0.4);
+      color: #47ff47;
+      border: 1px solid #003300;
+    }
+    .matrix #cframe.playing {
+      background-color: rgba(0, 0, 0, 1);
+    }
+    .matrix #timeline .frame {
+      background-color: #005700;
+      border: 1px solid #007e00;
+    }
+    .matrix #timeline .frame.current {
+      border: 2px solid #00c200;
+      background: #51ff51;
+    }
+    .matrix #timeline .frame.empty {
+      background-color: #000;
+    }
+    .matrix #timeline .frame:hover {
+      background-color: #007506;
+    }
+    .matrix #timeline .frame.current:hover {
+      background-color: #a3ffa3;
+    }
+    .matrix #timeline .frame.empty:hover {
+      background-color: #030;
+    }
+    .matrix input, .matrix select, .matrix button {
+      background: #040;
+      color: #0f0;
+      border: 1px solid #060;
+      accent-color: #00Af00;
+    }
+    .matrix #form input:hover {
+      background: #2d4d2d;
+      accent-color: #00ff00;
+    }
+    .matrix ::selection {
+      background: #00cd00;
+      color: #000000;
+    }
+    /* Matrix Theme END =============================*/
+
+    /* Hello Kitty Theme ================================= */
+    .hellokitty {
+      background: #ffdcff;
+      color: #ca00ca;
+    }
+    .hellokitty h1, .hellokitty h2, .hellokitty h3, .hellokitty h4, .hellokitty h5, .hellokitty h6 {
+      color: #7e007e;
+    }
+    .hellokitty a {
+      color: #8900c9;
+    }
+    .hellokitty .copyright {
+      color: #ff00ff;
+    }
+    .hellokitty #form, .hellokitty #content, .hellokitty #output {
+      background: #ffe3ff;
+      color: #ff00ff;
+      border: 1px solid #c983c9;
+    }
+    .hellokitty #pframe, .hellokitty #nframe {
+      background-color: #ffecff;
+      color: #0011ff;
+    }
+    .hellokitty #nframe {
+      background-color: rgba(255, 236, 255, 0.5);
+      color: #ff3300;
+    }
+    .hellokitty #cframe {
+      background-color: rgba(255, 236, 255, 0.6);
+      color: #a800a8;
+      border: 1px solid #ff00ff;
+    }
+    .hellokitty #cframe.playing {
+      background-color: rgba(255, 236, 255, 1);
+    }
+    .hellokitty #timeline .frame {
+      background-color: #ffb0ff;
+      border: 1px solid #ff00ff;
+    }
+    .hellokitty #timeline .frame.current {
+      border: 2px solid #b400b4;
+      background: #ff83ff;
+    }
+    .hellokitty #timeline .frame.empty {
+      background-color: #ffe2ff;
+    }
+    .hellokitty #timeline .frame:hover {
+      background-color: #ffccff;
+    }
+    .hellokitty #timeline .frame.current:hover {
+      background-color: #ffccff;
+    }
+    .hellokitty #timeline .frame.empty:hover {
+      background-color: #ffccff;
+    }
+    .hellokitty input, .hellokitty select, .hellokitty button {
+      background: #ffdaff;
+      color: #c200c2;
+      border: 1px solid #ff00ff;
+      accent-color: #ff00ff;
+    }
+    .hellokitty #form input:hover {
+      background: #ffccff;
+      accent-color: #ff00ff;
+    }
+    .hellokitty ::selection {
+      background: #ffccff;
+      color: #ff00ff;
+    }
+    /* Hello Kitty Theme END =============================*/
   </style>
 </head>
 <body>
@@ -229,18 +472,18 @@
           </tr>
           <tr>
             <td align="center">
-              <button id="prev" title="Previous Frame" >&larr;</button>
-              <button id="stop" title="Stop" >&#160;█▌</button>
-              <button id="play" title="Play/Pause" >►▌▌</button>
-              <button id="next" title="Next Frame" >&rarr;</button>
+              <button id="stop" title="Stop (Ctrl+Num8)">&#160;█▌</button><br />
+              <button id="prev" title="Previous Frame (Ctrl+Num4)" >&larr;</button>
+              <button id="play" title="Play/Pause (Ctrl+Num5)" >►▌▌</button>
+              <button id="next" title="Next Frame (Ctrl+Num6)" >&rarr;</button>
             </td>
           </tr>
           <tr>
             <td align="center">
-              <button id="delframe">Delete current Frame</button>
+              <button id="addLeftframe" title="(Alt+Num4)">Add Frame Left to Current</button>
+              <button id="addRightframe" title="(Alt+Num6)">Add Frame Right to Current</button>
               <br />
-              <button id="addLeftframe">Add Frame Left to Current</button>
-              <button id="addRightframe">Add Frame Right to Current</button>
+              <button id="delframe" title="(Ctrl+Num2)">Delete current Frame</button>
               <br />
               <Label for="show-prev-frame">Show Previous Frame:</Label>
               <input type="checkbox" id="show-prev-frame" checked />
@@ -258,9 +501,17 @@
       </td>
     </tr>
   </table>
+
+  <label for="theme">Theme:</label>
+  <select id="theme">
+    <option value="light">Light</option>
+    <option value="dark">Dark</option>
+    <option value="matrix">Matrix</option>
+    <option value="hellokitty">Hello Kitty</option>
+  </select>
+
   <span class="copyright">&copy; derDere <span id="copy-year"></span></span>
   <a class="home" href="https://github.com/derdere/ascii-art-animator/" title="View on GitHub">View on GitHub</a>
-
 
   <script type="text/javascript">
     function createNewAnimation() {
@@ -400,6 +651,7 @@
       let contentTxb = document.getElementById("content");
       let json = JSON.stringify(document.animation, null, 2);
       contentTxb.value = json;
+      window.localStorage.setItem("animation", json);
       updateOutput();
     }
 
@@ -413,6 +665,7 @@
         updateFrame();
         updateTimeline();
         updateOutput();
+        window.localStorage.setItem("animation", json);
       } catch (e) {
         console.error(e);
       }
@@ -638,6 +891,12 @@
       for (let i = 0; i < document.animation.frames.length; i++) {
         let frameEle = document.createElement("span");
         frameEle.classList.add("frame");
+        if (i == document.currentFrame) {
+          frameEle.classList.add("current");
+        }
+        if (!document.animation.frames[i]) {
+          frameEle.classList.add("empty");
+        }
         frameEle.addEventListener("click", frameItmClick);
         timelineEle.appendChild(frameEle);
       }
@@ -657,16 +916,29 @@
       updateTimeline();
     }
 
+    function restoreAnimation() {
+      let json = window.localStorage.getItem("animation");
+      if (json) {
+        document.getElementById("content").value = json;
+        updateAnimationFromContent();
+      }
+    }
+
     function init() {
       document.animation = createNewAnimation();
       document.isPlaying = false;
       document.currentFrame = 0;
       document.timer = null;
+
+      restoreAnimation();
+
       readIntoInputs();
       updateFrame();
       updateContent();
 
       document.getElementById("copy-year").textContent = new Date().getFullYear();
+
+      restoreTheme();
     }
 
     function updateNextFramePreview() {
@@ -687,6 +959,63 @@
       }
     }
 
+    function changeTheme() {
+      let theme = document.getElementById("theme").value;
+      if (theme != 'light') {
+        document.body.className = theme;
+      } else {
+        document.body.className = "";
+      }
+      window.localStorage.setItem("theme", theme);
+    }
+
+    function restoreTheme() {
+      let theme = window.localStorage.getItem("theme");
+      if (theme) {
+        document.getElementById("theme").value = theme;
+        changeTheme();
+      }
+    }
+
+    function workShortCuts(event) {
+      // do if elses and switches and always cancel the event if a shortcut is used
+      if (event.ctrlKey) {
+        switch (event.key) {
+          case "5":
+            playPauseAnimation();
+            event.preventDefault();
+            break;
+          case "8":
+            stopAnimation();
+            event.preventDefault();
+            break;
+          case "4":
+            prevFrame();
+            event.preventDefault();
+            break;
+          case "6":
+            nextFrame();
+            event.preventDefault();
+            break;
+          case "2":
+            delFrame();
+            event.preventDefault();
+            break;
+        }
+      } else if (event.altKey) {
+        switch (event.key) {
+          case "4":
+            addFrameLeft();
+            event.preventDefault();
+            break;
+          case "6":
+            addFrameRight();
+            event.preventDefault();
+            break;
+        }
+      }
+    }
+
     document.getElementById("name").addEventListener("input", updateName);
     document.getElementById("fps").addEventListener("change", updateFps);
     document.getElementById("play").addEventListener("click", playPauseAnimation);
@@ -704,6 +1033,8 @@
     document.getElementById("output-type").addEventListener("change", updateOutput);
     document.getElementById("show-next-frame").addEventListener("change", updateNextFramePreview);
     document.getElementById("show-prev-frame").addEventListener("change", updatePrevFramePreview);
+    document.getElementById("theme").addEventListener("change", changeTheme);
+    document.addEventListener("keydown", workShortCuts);
 
     init();
   </script>
@@ -741,6 +1072,11 @@ You can use it online at [ASCII Art Animator](https://derdere.github.io/ascii-ar
 - Displays the animation as json
 - Load an animation from json
 - Export the animation as json, html, c++, or c# code
+- Change the theme
+- Shortcuts for play/pause, stop, next frame, previous frame, delete frame, add frame left, and add frame right
+- Show/hide the previous and next frame in the preview
+- Store the animation in the local storage
+- Store the theme in the local storage
 
 ## License
 
@@ -755,6 +1091,7 @@ derDere
 ## View on GitHub
 
 [View on GitHub](https://github.com/derdere/ascii-art-animator/)
+
 
 
 -->
