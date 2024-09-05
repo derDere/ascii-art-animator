@@ -598,6 +598,9 @@
       cpp += "const char* " + constName + "_FRAMES[] = ";
       for (let i = 0; i < document.animation.frames.length; i++) {
         for(let line of document.animation.frames[i].split("\n")) {
+          while(line.length < document.animation.width) {
+            line += " ";
+          }
           cpp += "  \"" + line.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"\n";
         }
         cpp += "\n";
