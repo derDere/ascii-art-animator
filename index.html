@@ -596,13 +596,13 @@
       cpp += "#define " + constName + "_REPEAT " + (document.animation.repeat ? "true" : "false") + "\n";
       cpp += "\n";
       cpp += "#define " + constName + "_FRAME_COUNT " + document.animation.frames.length + "\n";
-      cpp += "const char* " + constName + "_FRAMES = \n";
+      cpp += "const wchar_t* " + constName + "_FRAMES = \n";
       for (let i = 0; i < document.animation.frames.length; i++) {
         for(let line of document.animation.frames[i].split("\n")) {
           while(line.length < document.animation.width) {
             line += " ";
           }
-          cpp += "  \"" + line.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"\n";
+          cpp += "  L\"" + line.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"\n";
         }
         cpp += "\n";
       }
